@@ -35,6 +35,7 @@ Say `jarvis upgrade`. It fetches the latest release, verifies it, runs pending m
 | `instructions.txt` | Instructions source (the release URL is filled in by `build.py`) |
 | `build.py` | `python3 build.py <release url> instructions.txt` → `release.json` |
 | `skills/claude/SKILL.md` | The loader skill for Claude |
+| `skills/gemini/INSTRUCTIONS.txt` | Paste into a Gemini skill named `jarvis` (Gemini needs the instructions inline) |
 
 ## Gemini
-Gemini refuses skills that load instructions from a database, so there the instructions are pasted into the Gemini skill directly, with a check that warns when a newer release is live (in progress).
+Gemini refuses skills that load instructions from a database, so there the instructions are pasted in directly: create a Gemini skill named `jarvis` with [`skills/gemini/INSTRUCTIONS.txt`](skills/gemini/INSTRUCTIONS.txt) as its instructions and the same connector added in Gemini. Each turn it checks the live version in your graph and tells you when a newer release needs re-pasting. Use Gemini's Task mode. Run `jarvis setup` once from Claude first.

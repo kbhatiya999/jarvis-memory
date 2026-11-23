@@ -40,3 +40,19 @@ release = {
 }
 json.dump(release, open("release.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print(release["md5"], len(ins), len(migrations))
+
+# Gemini copy: Gemini refuses skills that load instructions from a database, so it gets them inline,
+# with a version check that warns when a newer release is live in the graph.
+gem = f"""GEMINI COPY OF JARVIS v{release['version']} (schema {release['schema_version']}). Source: {url}
+
+FIRST, EVERY TURN: using the Jarvis Memory connector (the user does not need to tag it), run read-cypher: OPTIONAL MATCH (p:Person {{id:'me'}}) OPTIONAL MATCH (c:JarvisConfig {{active:true}}) RETURN p.name, p.pronoun_subject, p.pronoun_object, p.pronoun_possessive, p.timezone, p.language, p.schema_version, c.version AS live
+- If there is no Person, the graph is not set up: tell the user to run "jarvis setup" once from Claude (see the jarvis-memory README), and stop.
+- If live is higher than {release['version']}, start your reply with one line: "Your Gemini Jarvis is v{release['version']} but v<live> is live: paste the newer skills/gemini/INSTRUCTIONS.txt into the Gemini skill." Then continue.
+- Use only Task mode for anything with @jarvis. If you cannot reach the Jarvis Memory tools, say so plainly and suggest Task mode; never pretend anything was saved.
+- The profile read above replaces the loader read mentioned below. jarvis upgrade in Gemini only updates the graph; this Gemini copy itself must be re-pasted.
+
+"""
+import os
+os.makedirs("skills/gemini", exist_ok=True)
+open("skills/gemini/INSTRUCTIONS.txt", "w", encoding="utf-8").write(gem + ins)
+print("gemini", len(gem + ins))
