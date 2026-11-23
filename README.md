@@ -10,7 +10,12 @@ Tell it things the way you'd tell a friend: *"I have to pay rent by Friday"*, *"
 
 ### 1. Get your free database (3 min)
 1. Go to **[console.neo4j.io](https://console.neo4j.io)** and sign in with Google.
-2. If it asks what you'll use it for, pick the **AI / agents / assistant** style option.
+2. Aura asks a few quick questions. Answer them like this (these are the answers we tested with):
+   | Screen | Pick |
+   |---|---|
+   | **Define your goal** — *Choose what you want to achieve first.* | **Build a graph-powered application** |
+   | **Select your role** — *Helps us tailor your experience.* | **Student** (or whatever fits you) |
+   | **Your use case** — *Choose the scenario that best matches your work.* | **Knowledge Graph** |
 3. Click **Create instance** → **Free** → wait until it says *Running*.
 4. Copy the **Instance ID** (8 characters, like `1a2b3c4d`) shown on the instance card.
 
