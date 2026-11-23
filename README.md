@@ -72,11 +72,12 @@ Tell it things the way you'd tell a friend: *"I have to pay rent by Friday"*, *"
 ### 4. Say hello (2 min)
 1. Open **[Gemini](https://gemini.google.com/app)**, switch **Chat → Task** (under the message box) and pick the **Hydrogen** model.
 2. Type `@jar`, pick **jarvis**, and send: **`jarvis setup`**
-3. Click **Allow once** when asked, and answer four quick questions (your name, pronouns, time zone, language).
+3. When Gemini asks *Let Gemini use Write Cypher?* (and *Read Cypher*), click **Always allow** — otherwise it stops and waits for you before every save. Then answer four quick questions (your name, pronouns, time zone, language).
 
-   <details><summary>Show me the screen</summary>
+   <details><summary>Show me the screens</summary>
 
    ![Task mode, Hydrogen, jarvis picked](docs/gemini-setup/12-task-hydrogen.png)
+   ![Click Always allow](docs/gemini-setup/13-always-allow.png)
    </details>
 
 Done. From now on just start a Task message with `@jarvis`.
@@ -104,7 +105,7 @@ Done. From now on just start a Task message with `@jarvis`.
 | Jarvis doesn't respond as Jarvis, or acts like a generic bot | Use **Task**, not Chat. Start the message with `@jarvis` picked from the list. |
 | "I don't have access" / tools never run | Switch the model to **Hydrogen** (Everyday help). In our tests the Deeper analysis model could not use connectors. |
 | The skill's instructions went back to the old text after saving | Save again and wait until the button says **Saved**, then reopen **⋯ → Edit manually** to check it starts with `GEMINI COPY OF JARVIS`. |
-| It asks permission before every save | That's Gemini's safety setting. Click **Allow once**, or set the connector's Read/Write to *Always allow* in Gemini's connector settings. |
+| It asks permission before every save, or stops at *Waiting for your input* | Click **Always allow** on the *Read Cypher* / *Write Cypher* prompt. Already clicked *Allow once*? Open [Connectors](https://gemini.google.com/customize/connectors) → **⋯** next to Jarvis Memory → set Read and Write to *Always allow*. |
 | Jarvis says a newer version is live | Open [Skills](https://gemini.google.com/customize/skills) → **⋯** next to jarvis → **Edit manually** → replace the instructions with the latest [file](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt) → Save. Your memories are untouched. |
 | Setup stopped with an error | Send `jarvis setup` again — every step is safe to repeat. |
 
