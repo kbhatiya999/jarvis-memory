@@ -16,6 +16,12 @@ Tell it things the way you'd tell a friend: *"I have to pay rent by Friday"*, *"
    | **Define your goal** — *Choose what you want to achieve first.* | **Build a graph-powered application** |
    | **Select your role** — *Helps us tailor your experience.* | **Student** (or whatever fits you) |
    | **Your use case** — *Choose the scenario that best matches your work.* | **Knowledge Graph** |
+   <details><summary>Show me the screens</summary>
+
+   ![Define your goal: pick Build a graph-powered application](docs/aura-onboarding/2-goal.png)
+   ![Select your role: pick Student or whatever fits](docs/aura-onboarding/3-role.png)
+   ![Your use case: pick Knowledge Graph](docs/aura-onboarding/4-use-case.png)
+   </details>
 3. Click **Create instance** → **Free** → wait until it says *Running*.
 4. Copy the **Instance ID** (8 characters, like `1a2b3c4d`) shown on the instance card.
 
