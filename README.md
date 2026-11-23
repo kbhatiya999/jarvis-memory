@@ -34,25 +34,50 @@ Tell it things the way you'd tell a friend: *"I have to pay rent by Friday"*, *"
    </details>
 
 ### 2. Connect it to Gemini (2 min)
-1. In [Gemini](https://gemini.google.com): **More** → **Customize** → **Connectors** → **+ Custom**.
-2. **URL:** paste the MCP URL you just copied.
-3. Leave client ID and secret **empty** → sign in with **Continue with Neo4j Aura**.
-4. Name it **`Jarvis Memory`**.
+1. Open **[gemini.google.com/customize/connectors](https://gemini.google.com/customize/connectors)** (or **Customise** in Gemini's left menu → **Connectors**) and click **+ Custom**.
+2. **MCP server URL:** paste the MCP URL you copied → **Next**.
+3. Tick **I understand and accept the security and privacy risks…** → **Connect**.
+4. Click **Agree and continue** → **Continue with Neo4j Aura** → **Accept**.
+5. Gemini suggests the name *Neo4j Mcp* — change it to **`Jarvis Memory`** → **Connect**. (The name can't be changed later.)
+
+   <details><summary>Show me the screens</summary>
+
+   ![Connectors page: click + Custom](docs/gemini-setup/1-connectors-custom.png)
+   ![Paste the MCP URL, then Next](docs/gemini-setup/2-mcp-url.png)
+   ![Tick the checkbox, then Connect](docs/gemini-setup/3-accept-risks.png)
+   ![Click Agree and continue](docs/gemini-setup/4-agree-continue.png)
+   ![Click Continue with Neo4j Aura](docs/gemini-setup/5-continue-neo4j-aura.png)
+   ![Click Accept](docs/gemini-setup/6-authorize-accept.png)
+   ![Rename to Jarvis Memory, then Connect](docs/gemini-setup/7-name-jarvis-memory.png)
+   </details>
 
 ### 3. Add the Jarvis skill (3 min)
-1. **More** → **Customize** → **Skills** → **Create** → **Create manually**.
+1. Open **[gemini.google.com/customize/skills](https://gemini.google.com/customize/skills)** (or **Customise** → **Skills**) → **Create** → **Create manually**.
 2. **Name:** `jarvis`
 3. **Description:** copy this —
    ```
    Your Jarvis, backed by the Jarvis Memory connector. Use whenever the user tells you something about their life, asks what you know or remember, asks what you can do, mentions routines, reminders, plans, habits or things they want to be true, or types a command starting with 'jarvis'.
    ```
-4. **Instructions:** open **[this file](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt)**, select all, copy, paste.
-5. Click **Save**.
+4. **Instructions:** open **[this file](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt)**, select all (`Cmd/Ctrl+A`), copy, and paste it into Instructions. It should start with `GEMINI COPY OF JARVIS`.
+5. Click **Create** (top right).
+
+   <details><summary>Show me the screens</summary>
+
+   ![Skills page: Create, then Create manually](docs/gemini-setup/8-skills-create-manually.png)
+   ![Name jarvis and paste the description](docs/gemini-setup/9-name-description.png)
+   ![Open the instructions file and select all](docs/gemini-setup/10-raw-select-all.png)
+   ![Instructions pasted, then Create](docs/gemini-setup/11-instructions-pasted.png)
+   </details>
 
 ### 4. Say hello (2 min)
-1. Start a new chat and switch **Chat → Task** (just under the message box).
+1. Open **[Gemini](https://gemini.google.com/app)**, switch **Chat → Task** (under the message box) and pick the **Hydrogen** model.
 2. Type `@jar`, pick **jarvis**, and send: **`jarvis setup`**
 3. Click **Allow once** when asked, and answer four quick questions (your name, pronouns, time zone, language).
+
+   <details><summary>Show me the screen</summary>
+
+   ![Task mode, Hydrogen, jarvis picked](docs/gemini-setup/12-task-hydrogen.png)
+   </details>
 
 Done. From now on just start a Task message with `@jarvis`.
 
@@ -80,7 +105,7 @@ Done. From now on just start a Task message with `@jarvis`.
 | "I don't have access" / tools never run | Switch the model to **Hydrogen** (Everyday help). In our tests the Deeper analysis model could not use connectors. |
 | The skill's instructions went back to the old text after saving | Save again and wait until the button says **Saved**, then reopen **⋯ → Edit manually** to check it starts with `GEMINI COPY OF JARVIS`. |
 | It asks permission before every save | That's Gemini's safety setting. Click **Allow once**, or set the connector's Read/Write to *Always allow* in Gemini's connector settings. |
-| Jarvis says a newer version is live | Open the skill → **⋯ → Edit manually** → replace the instructions with the latest [file](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt) → Save. Your memories are untouched. |
+| Jarvis says a newer version is live | Open [Skills](https://gemini.google.com/customize/skills) → **⋯** next to jarvis → **Edit manually** → replace the instructions with the latest [file](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt) → Save. Your memories are untouched. |
 | Setup stopped with an error | Send `jarvis setup` again — every step is safe to repeat. |
 
 ---
