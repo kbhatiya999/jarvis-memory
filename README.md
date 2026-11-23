@@ -16,18 +16,26 @@ Tell it things the way you'd tell a friend: *"I have to pay rent by Friday"*, *"
    | **Define your goal** — *Choose what you want to achieve first.* | **Build a graph-powered application** |
    | **Select your role** — *Helps us tailor your experience.* | **Student** (or whatever fits you) |
    | **Your use case** — *Choose the scenario that best matches your work.* | **Knowledge Graph** |
+   | **Start with free instance** — *No credit card required* | **Create a free instance** |
+3. A **Credentials for Free instance** box appears. Click **Download and continue**. Jarvis doesn't need this password; keep the file somewhere private.
+4. In the left menu click **Instances**. On your **Free instance** card (it says *RUNNING*), click **⋯** → **Inspect**.
+5. Next to **MCP URL** (it looks like `https://xxxxxxxx.mcp-instances.neo4j.io`), click the **copy** icon.
+
    <details><summary>Show me the screens</summary>
 
    ![Define your goal: pick Build a graph-powered application](docs/aura-onboarding/2-goal.png)
    ![Select your role: pick Student or whatever fits](docs/aura-onboarding/3-role.png)
    ![Your use case: pick Knowledge Graph](docs/aura-onboarding/4-use-case.png)
+   ![Start with free instance: click Create a free instance](docs/aura-onboarding/5-free-instance.png)
+   ![Credentials box: click Download and continue](docs/aura-onboarding/6-credentials.png)
+   ![Console home: click Instances in the left menu](docs/aura-onboarding/7-console-home.png)
+   ![Instance card: click the three dots, then Inspect](docs/aura-onboarding/8-instance-menu.png)
+   ![Inspect panel: copy the MCP URL](docs/aura-onboarding/9-mcp-url.png)
    </details>
-3. Click **Create instance** → **Free** → wait until it says *Running*.
-4. Copy the **Instance ID** (8 characters, like `1a2b3c4d`) shown on the instance card.
 
 ### 2. Connect it to Gemini (2 min)
 1. In [Gemini](https://gemini.google.com): **More** → **Customize** → **Connectors** → **+ Custom**.
-2. URL: `https://YOUR-INSTANCE-ID.mcp-instances.neo4j.io` (paste your ID in place of `YOUR-INSTANCE-ID`).
+2. **URL:** paste the MCP URL you just copied.
 3. Leave client ID and secret **empty** → sign in with **Continue with Neo4j Aura**.
 4. Name it **`Jarvis Memory`**.
 
