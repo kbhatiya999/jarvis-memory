@@ -38,4 +38,17 @@ Say `jarvis upgrade`. It fetches the latest release, verifies it, runs pending m
 | `skills/gemini/INSTRUCTIONS.txt` | Paste into a Gemini skill named `jarvis` (Gemini needs the instructions inline) |
 
 ## Gemini
-Gemini refuses skills that load instructions from a database, so there the instructions are pasted in directly: create a Gemini skill named `jarvis` with [`skills/gemini/INSTRUCTIONS.txt`](skills/gemini/INSTRUCTIONS.txt) as its instructions and the same connector added in Gemini. Each turn it checks the live version in your graph and tells you when a newer release needs re-pasting. Use Gemini's Task mode. Run `jarvis setup` once from Claude first.
+Gemini refuses skills that load instructions from a database, so there the instructions are pasted in directly. Each turn the Gemini copy checks the live version in your graph and tells you when a newer release needs re-pasting.
+
+**Set it up (once):**
+1. **Set up the graph from Claude first** (steps 1–4 above). Gemini uses the same database.
+2. **Add the connector in Gemini:** gemini.google.com → **More** → **Customize** → **Connectors** → **+ Custom**. URL `https://<your-instance-id>.mcp-instances.neo4j.io`, leave client ID/secret empty, sign in with **Continue with Neo4j Aura**, and name it `Jarvis Memory` (the name can't be changed later, only deleted and re-added).
+3. **Create the skill manually:** **More** → **Customize** → **Skills** → **Create** → **Create manually**, then fill in:
+   - **Name:** `jarvis`
+   - **Description:** `Your Jarvis, backed by the Jarvis Memory connector. Use whenever the user tells you something about their life, asks what you know or remember, asks what you can do, mentions routines, reminders, plans, habits or things they want to be true, or types a command starting with 'jarvis'.`
+   - **Instructions:** open [`skills/gemini/INSTRUCTIONS.txt`](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt), select all (`Cmd/Ctrl+A`), copy, and paste it into the Instructions box.
+   - Click **Save** and wait until the button says **Saved**.
+4. **Confirm it stuck:** go back to Skills → **⋯** next to `jarvis` → **Edit manually**. The instructions must start with `GEMINI COPY OF JARVIS v…`. If you see the old text, the save didn't persist — paste and save again.
+5. **Use it:** new chat → switch **Chat** to **Task** under the message box → model **Hydrogen** (Everyday help; Neon can't reach connectors) → type `@jar`, pick **jarvis**, add your message. Click **Allow once** when it asks to write. Try `@jarvis jarvis version` first.
+
+**Updating Gemini:** when Gemini says a newer version is live, open Skills → **⋯** next to `jarvis` → **Edit manually**, select all in Instructions, paste the latest [`INSTRUCTIONS.txt`](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt), Save, and confirm as in step 4. Your data is untouched; only Gemini's copy of the instructions changes.
