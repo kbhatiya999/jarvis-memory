@@ -1,57 +1,81 @@
-# jarvis-memory
+# Jarvis
 
-A personal **Jarvis** that lives in **your own Neo4j graph** and works from Claude (and Gemini). It keeps a living model of you — what you want to be true, what happened, what it has learned about you — and does the single most useful thing to help, or deliberately stays quiet.
+**A personal assistant inside Gemini that remembers your life and helps you follow through.**
 
-This repo is the **public release**: Jarvis's instructions plus the database migrations that create and evolve the graph. It contains nothing personal; your data stays in your database.
+Tell it things the way you'd tell a friend: *"I have to pay rent by Friday"*, *"gym every weekday at 6"*, *"I want to eat healthier"*. Jarvis remembers, plans a first step ahead of time, puts it on your calendar, checks in, and backs off when you say stop. Your memories live in **your own free database**, not in a chat history.
 
-## How it works
-- Your graph holds a versioned `JarvisConfig` node (the instructions) and `Migration` nodes (schema changes).
-- The `jarvis` skill in Claude is a thin **loader**: each turn it reads the active instructions from your graph and follows them.
-- **Setup** and **upgrades** pull [`release.json`](release.json) straight into your database (`apoc.load.json`), check its md5, run only the migrations you haven't had, and switch versions. Migrations are additive and idempotent; `jarvis rollback` switches back without touching data.
+---
 
-## Setup (about 10 minutes)
-1. **Neo4j:** create a free [Aura](https://console.neo4j.io) instance. In Organization → Security, turn on *Tool authentication with Aura user* and tick the instance.
-2. **Connector:** in claude.ai → Settings → Connectors → *Add custom connector*: name `Jarvis Memory`, URL `https://<your-instance-id>.mcp-instances.neo4j.io`, leave client ID/secret empty, sign in with Neo4j Aura.
-3. **Skill:** in Claude, create a skill from [`skills/claude/SKILL.md`](skills/claude/SKILL.md).
-4. In a chat with the connector on, say **`jarvis setup`** (or just say hi — an empty graph triggers it). Jarvis imports the release, creates the constraints and spheres in about 5 calls, asks your name, pronouns, time zone and language, and greets you.
+## Set it up — about 10 minutes, all free
 
-Using only Gemini? Skip steps 2–3 and follow the Gemini section below; setup works there too.
+### 1. Get your free database (3 min)
+1. Go to **[console.neo4j.io](https://console.neo4j.io)** and sign in with Google.
+2. If it asks what you'll use it for, pick the **AI / agents / assistant** style option.
+3. Click **Create instance** → **Free** → wait until it says *Running*.
+4. Copy the **Instance ID** (8 characters, like `1a2b3c4d`) shown on the instance card.
 
-Then just talk to it, or use `jarvis help`.
+### 2. Connect it to Gemini (2 min)
+1. In [Gemini](https://gemini.google.com): **More** → **Customize** → **Connectors** → **+ Custom**.
+2. URL: `https://YOUR-INSTANCE-ID.mcp-instances.neo4j.io` (paste your ID in place of `YOUR-INSTANCE-ID`).
+3. Leave client ID and secret **empty** → sign in with **Continue with Neo4j Aura**.
+4. Name it **`Jarvis Memory`**.
 
-## Upgrading
-Say `jarvis upgrade`. It fetches the latest release, verifies it, runs pending migrations, compares node/relationship counts before and after, and activates the new version. `jarvis version` shows what's live; `jarvis rollback` goes back.
+### 3. Add the Jarvis skill (3 min)
+1. **More** → **Customize** → **Skills** → **Create** → **Create manually**.
+2. **Name:** `jarvis`
+3. **Description:** copy this —
+   ```
+   Your Jarvis, backed by the Jarvis Memory connector. Use whenever the user tells you something about their life, asks what you know or remember, asks what you can do, mentions routines, reminders, plans, habits or things they want to be true, or types a command starting with 'jarvis'.
+   ```
+4. **Instructions:** open **[this file](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt)**, select all, copy, paste.
+5. Click **Save**.
 
-## The Charter (what Jarvis must always do)
-- **Active:** plan backward from every deadline; help *today's* attempt while it can still succeed; offer things on its own when it notices room.
-- **Purposeful:** every unprompted suggestion names the goal it serves; staying quiet is a judgement; a "stop" is permanent.
-- **Understanding:** learns from outcomes; everything it believes about you is visible and deletable.
-- **Gradual:** assertiveness rises with success and falls with rejection, per life area.
-- **Honest:** every decision carries its reason; never claims an outcome you didn't confirm.
+### 4. Say hello (2 min)
+1. Start a new chat and switch **Chat → Task** (just under the message box).
+2. Type `@jar`, pick **jarvis**, and send: **`jarvis setup`**
+3. Click **Allow once** when asked, and answer four quick questions (your name, pronouns, time zone, language).
 
-## Files
-| File | Purpose |
+Done. From now on just start a Task message with `@jarvis`.
+
+---
+
+## What to say
+
+| You say | Jarvis does |
 |---|---|
-| `release.json` | Latest release: instructions, md5, migrations from an empty graph |
-| `releases/vN.json` | Frozen copy of each version |
-| `instructions.txt` | Instructions source (the release URL is filled in by `build.py`) |
-| `build.py` | `python3 build.py <release url> instructions.txt` → `release.json` |
-| `skills/claude/SKILL.md` | The loader skill for Claude |
-| `skills/gemini/INSTRUCTIONS.txt` | Paste into a Gemini skill named `jarvis` (Gemini needs the instructions inline) |
+| "I have to pay the electricity bill by Wednesday 8pm" | Plans a step the evening before, adds it to your calendar, reminds you |
+| "Gym every weekday at 6pm" | Sets up the routine and helps *today's* session happen |
+| "I want to be healthier" | Remembers it and suggests small steps when you have free time |
+| "Done" / "Skipped it" | Records only what you confirm, and learns from it |
+| "Stop reminding me about the gym" | Stops for good |
+| `jarvis today` · `jarvis brief` · `jarvis beliefs` · `jarvis why` · `jarvis help` | Today's list · a quick brief · what it believes about you · why it did something · all commands |
 
-## Gemini
-Gemini refuses skills that load instructions from a database, so there the instructions are pasted in directly. Each turn the Gemini copy checks the live version in your graph and tells you when a newer release needs re-pasting.
+---
 
-**Set it up (once):**
-1. **Neo4j:** do Setup step 1 above (free Aura instance + tool authentication).
-2. **Add the connector in Gemini:** gemini.google.com → **More** → **Customize** → **Connectors** → **+ Custom**. URL `https://<your-instance-id>.mcp-instances.neo4j.io`, leave client ID/secret empty, sign in with **Continue with Neo4j Aura**, and name it `Jarvis Memory` (the name can't be changed later, only deleted and re-added).
-3. **Create the skill manually:** **More** → **Customize** → **Skills** → **Create** → **Create manually**, then fill in:
-   - **Name:** `jarvis`
-   - **Description:** `Your Jarvis, backed by the Jarvis Memory connector. Use whenever the user tells you something about their life, asks what you know or remember, asks what you can do, mentions routines, reminders, plans, habits or things they want to be true, or types a command starting with 'jarvis'.`
-   - **Instructions:** open [`skills/gemini/INSTRUCTIONS.txt`](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt), select all (`Cmd/Ctrl+A`), copy, and paste it into the Instructions box.
-   - Click **Save** and wait until the button says **Saved**.
-4. **Confirm it stuck:** go back to Skills → **⋯** next to `jarvis` → **Edit manually**. The instructions must start with `GEMINI COPY OF JARVIS v…`. If you see the old text, the save didn't persist — paste and save again.
-5. **First run:** in a new Task, `@jarvis jarvis setup` — it builds your graph and asks your name, pronouns, time zone and language. Click **Allow once** for each write.
-6. **Use it:** new chat → switch **Chat** to **Task** under the message box → model **Hydrogen** (Everyday help; Neon can't reach connectors) → type `@jar`, pick **jarvis**, add your message. Click **Allow once** when it asks to write. Try `@jarvis jarvis version` first.
+## Troubleshooting
 
-**Updating Gemini:** when Gemini says a newer version is live, open Skills → **⋯** next to `jarvis` → **Edit manually**, select all in Instructions, paste the latest [`INSTRUCTIONS.txt`](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt), Save, and confirm as in step 4. Your data is untouched; only Gemini's copy of the instructions changes.
+| Problem | Fix |
+|---|---|
+| **"I can't reach your memory"**, or the connector fails to sign in | In [console.neo4j.io](https://console.neo4j.io): **Organization → Security** → turn on **Tool authentication with Aura user** and tick your instance. Then reconnect the connector in Gemini. |
+| Jarvis doesn't respond as Jarvis, or acts like a generic bot | Use **Task**, not Chat. Start the message with `@jarvis` picked from the list. |
+| "I don't have access" / tools never run | Switch the model to **Hydrogen** (Everyday help). In our tests the Deeper analysis model could not use connectors. |
+| The skill's instructions went back to the old text after saving | Save again and wait until the button says **Saved**, then reopen **⋯ → Edit manually** to check it starts with `GEMINI COPY OF JARVIS`. |
+| It asks permission before every save | That's Gemini's safety setting. Click **Allow once**, or set the connector's Read/Write to *Always allow* in Gemini's connector settings. |
+| Jarvis says a newer version is live | Open the skill → **⋯ → Edit manually** → replace the instructions with the latest [file](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt) → Save. Your memories are untouched. |
+| Setup stopped with an error | Send `jarvis setup` again — every step is safe to repeat. |
+
+---
+
+## Using Claude instead
+Add the same connector in claude.ai (**Settings → Connectors → Add custom connector**, same URL), create a skill from [`skills/claude/SKILL.md`](skills/claude/SKILL.md), and say `jarvis setup`. Claude and Gemini can share one database.
+
+<details>
+<summary><b>How it works, privacy, and updates</b></summary>
+
+- **Your data stays yours.** Everything Jarvis remembers is stored in your own Neo4j database. This repo contains only instructions — nothing personal.
+- **Versioned and upgradeable.** Your database holds the active Jarvis version. `jarvis upgrade` fetches the latest [`release.json`](release.json), checks its fingerprint (md5), applies only the changes you haven't had, and verifies nothing was lost. `jarvis version` shows what's live; `jarvis rollback` goes back.
+- **Gemini** keeps its own copy of the instructions (Gemini doesn't allow skills that load instructions from a database), so after an upgrade it tells you to re-paste the file.
+- **What Jarvis must always do (the Charter):** plan backward from deadlines; help today's attempt while it can still succeed; offer help on its own when it notices room; say why it suggests anything; treat "stop" as permanent; learn from outcomes; show and delete anything it believes about you on request; never claim something happened unless you said so.
+
+**Files:** `release.json` (latest release) · `releases/vN.json` (frozen versions) · `instructions.txt` + `build.py` (source and build) · `skills/gemini/INSTRUCTIONS.txt` · `skills/claude/SKILL.md`
+</details>
