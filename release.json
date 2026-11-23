@@ -166,5 +166,55 @@
    "expected_delta": "0",
    "note": "Store name unique"
   }
- ]
+ ],
+ "setup": {
+  "indexes": {
+   "Event": [
+    [
+     "type",
+     "at"
+    ]
+   ]
+  },
+  "constraints": {
+   "Person": [
+    "id"
+   ],
+   "Sphere": [
+    "name"
+   ],
+   "Intention": [
+    "id"
+   ],
+   "Event": [
+    "id",
+    "key"
+   ],
+   "Fact": [
+    "id"
+   ],
+   "Contact": [
+    "name"
+   ],
+   "Topic": [
+    "name"
+   ],
+   "JarvisConfig": [
+    "version"
+   ],
+   "Migration": [
+    "id"
+   ],
+   "Resolution": [
+    "id"
+   ],
+   "Item": [
+    "id"
+   ],
+   "Store": [
+    "name"
+   ]
+  },
+  "seed": "MERGE (p:Person {id:'me'}) ON CREATE SET p.trust_phase = 'new' WITH p UNWIND ['health','work','money','relationships','home','learning','self'] AS s MERGE (x:Sphere {name:s}) ON CREATE SET x.version = 0 MERGE (p)-[t:TRUSTS]->(x) ON CREATE SET t.level = 0.3, t.updated_at = datetime() WITH count(x) AS spheres OPTIONAL MATCH (m:Migration) WHERE m.to_schema <= 3 AND m.applied_at IS NULL SET m.applied_at = datetime(), m.applied_note = 'fast setup' RETURN spheres, count(m) AS migrations_marked"
+ }
 }

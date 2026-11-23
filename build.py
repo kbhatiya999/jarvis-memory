@@ -29,6 +29,15 @@ migrations += [
     m("s3-004", 3, 4, C("store_name", "Store", "name"), "0", "Store name unique"),
 ]
 
+URL = url
+SETUP_TEXT = f"""SETUP (empty graph, or "jarvis setup"; exempt from the 4-call limit; about 5 calls). Tell the user what will happen, then:
+S1. Import the release (write-cypher): CALL apoc.load.json('{url}') YIELD value MERGE (c:JarvisConfig {{version: value.version}}) ON CREATE SET c.schema_version = value.schema_version, c.instructions = value.instructions, c.notes = value.notes, c.active = false, c.created_at = datetime() WITH value, c UNWIND value.migrations AS x MERGE (m:Migration {{id: x.id}}) ON CREATE SET m.to_schema = x.to_schema, m.seq = x.seq, m.statement = x.statement, m.expected_delta = x.expected_delta, m.note = x.note, m.created_at = datetime() WITH value, c, count(m) AS migrations RETURN c.version, value.schema_version AS schema, migrations, apoc.util.md5([c.instructions]) = value.md5 AS md5_ok. If md5_ok is false, stop: the download is corrupted.
+S2. Constraints and indexes in one call (write-cypher): CALL apoc.load.json('{url}') YIELD value CALL apoc.schema.assert(value.setup.indexes, value.setup.constraints, false) YIELD label, key, action RETURN action, count(*) AS n
+S3. Recall index (write-cypher): CREATE FULLTEXT INDEX recall_text IF NOT EXISTS FOR (n:Event|Fact|Intention) ON EACH [n.text, n.statement]
+S4. Seed the graph (write-cypher): {{seed}}
+S5. Ask the user in one message: the name to call them, pronouns (she/her, he/him, they/them or other), time zone (IANA, e.g. Asia/Kolkata) and language. Then (write-cypher): MATCH (p:Person {{id:'me'}}) SET p.name = $name, p.pronoun_subject = $s, p.pronoun_object = $o, p.pronoun_possessive = $poss, p.timezone = $tz, p.language = $lang, p.schema_version = {{schema}}, p.updated_at = datetime() WITH p MATCH (c:JarvisConfig) SET c.active = (c.version = {{version}}) RETURN p.name, COUNT {{ (:Sphere) }} AS spheres, COUNT {{ ()-[:TRUSTS]->() }} AS trusts, COUNT {{ (m:Migration) WHERE m.applied_at IS NULL AND m.to_schema <= {{schema}} }} AS pending
+    Expect spheres 7, trusts 7, pending 0. Then greet the user with jarvis help."""
+
 release = {
     "format": 1,
     "version": 9,
@@ -37,7 +46,23 @@ release = {
     "md5": hashlib.md5(ins.encode("utf-8")).hexdigest(),
     "instructions": ins,
     "migrations": migrations,
+    "setup": {
+        "indexes": {"Event": [["type", "at"]]},
+        "constraints": {"Person": ["id"], "Sphere": ["name"], "Intention": ["id"], "Event": ["id", "key"], "Fact": ["id"],
+                        "Contact": ["name"], "Topic": ["name"], "JarvisConfig": ["version"], "Migration": ["id"],
+                        "Resolution": ["id"], "Item": ["id"], "Store": ["name"]},
+        "seed": None,
+    },
 }
+release["setup"]["seed"] = (
+    "MERGE (p:Person {id:'me'}) ON CREATE SET p.trust_phase = 'new' "
+    "WITH p UNWIND ['health','work','money','relationships','home','learning','self'] AS s "
+    "MERGE (x:Sphere {name:s}) ON CREATE SET x.version = 0 "
+    "MERGE (p)-[t:TRUSTS]->(x) ON CREATE SET t.level = 0.3, t.updated_at = datetime() "
+    "WITH count(x) AS spheres OPTIONAL MATCH (m:Migration) WHERE m.to_schema <= " + str(release["schema_version"]) + " AND m.applied_at IS NULL "
+    "SET m.applied_at = datetime(), m.applied_note = 'fast setup' RETURN spheres, count(m) AS migrations_marked"
+)
+SETUP_TEXT = SETUP_TEXT.replace("{seed}", release["setup"]["seed"]).replace("{schema}", str(release["schema_version"])).replace("{version}", str(release["version"]))
 json.dump(release, open("release.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print(release["md5"], len(ins), len(migrations))
 
@@ -46,13 +71,20 @@ print(release["md5"], len(ins), len(migrations))
 gem = f"""GEMINI COPY OF JARVIS v{release['version']} (schema {release['schema_version']}). Source: {url}
 
 FIRST, EVERY TURN: using the Jarvis Memory connector (the user does not need to tag it), run read-cypher: OPTIONAL MATCH (p:Person {{id:'me'}}) OPTIONAL MATCH (c:JarvisConfig {{active:true}}) RETURN p.name, p.pronoun_subject, p.pronoun_object, p.pronoun_possessive, p.timezone, p.language, p.schema_version, c.version AS live
-- If there is no Person, the graph is not set up: tell the user to run "jarvis setup" once from Claude (see the jarvis-memory README), and stop.
+- If there is no Person or no active JarvisConfig, the graph is not set up yet: run SETUP below, then stop for this turn.
 - If live is higher than {release['version']}, start your reply with one line: "Your Gemini Jarvis is v{release['version']} but v<live> is live: paste the newer skills/gemini/INSTRUCTIONS.txt into the Gemini skill." Then continue.
 - Use only Task mode for anything with @jarvis. If you cannot reach the Jarvis Memory tools, say so plainly and suggest Task mode; never pretend anything was saved.
 - The profile read above replaces the loader read mentioned below. jarvis upgrade in Gemini only updates the graph; this Gemini copy itself must be re-pasted.
 
-"""
+""" + SETUP_TEXT + "\n\n"
 import os
 os.makedirs("skills/gemini", exist_ok=True)
 open("skills/gemini/INSTRUCTIONS.txt", "w", encoding="utf-8").write(gem + ins)
 print("gemini", len(gem + ins))
+
+# Claude loader: keep its Setup section identical to the Gemini one.
+sk = open("skills/claude/SKILL.md", encoding="utf-8").read()
+a, b = sk.index("## Setup"), sk.index("## Recovery")
+sk = sk[:a] + "## Setup (empty graph, or \"jarvis setup\")\n" + SETUP_TEXT.split("\n", 1)[1].replace("Tell the user", "Tell the user", 1) + "\n\n" + sk[b:]
+open("skills/claude/SKILL.md", "w", encoding="utf-8").write(sk)
+print("claude skill setup synced")

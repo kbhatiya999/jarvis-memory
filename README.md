@@ -13,7 +13,9 @@ This repo is the **public release**: Jarvis's instructions plus the database mig
 1. **Neo4j:** create a free [Aura](https://console.neo4j.io) instance. In Organization → Security, turn on *Tool authentication with Aura user* and tick the instance.
 2. **Connector:** in claude.ai → Settings → Connectors → *Add custom connector*: name `Jarvis Memory`, URL `https://<your-instance-id>.mcp-instances.neo4j.io`, leave client ID/secret empty, sign in with Neo4j Aura.
 3. **Skill:** in Claude, create a skill from [`skills/claude/SKILL.md`](skills/claude/SKILL.md).
-4. In a chat with the connector on, say **`jarvis setup`**. Jarvis imports the release, builds the graph, asks your name, pronouns, time zone and language, and greets you.
+4. In a chat with the connector on, say **`jarvis setup`** (or just say hi — an empty graph triggers it). Jarvis imports the release, creates the constraints and spheres in about 5 calls, asks your name, pronouns, time zone and language, and greets you.
+
+Using only Gemini? Skip steps 2–3 and follow the Gemini section below; setup works there too.
 
 Then just talk to it, or use `jarvis help`.
 
@@ -41,7 +43,7 @@ Say `jarvis upgrade`. It fetches the latest release, verifies it, runs pending m
 Gemini refuses skills that load instructions from a database, so there the instructions are pasted in directly. Each turn the Gemini copy checks the live version in your graph and tells you when a newer release needs re-pasting.
 
 **Set it up (once):**
-1. **Set up the graph from Claude first** (steps 1–4 above). Gemini uses the same database.
+1. **Neo4j:** do Setup step 1 above (free Aura instance + tool authentication).
 2. **Add the connector in Gemini:** gemini.google.com → **More** → **Customize** → **Connectors** → **+ Custom**. URL `https://<your-instance-id>.mcp-instances.neo4j.io`, leave client ID/secret empty, sign in with **Continue with Neo4j Aura**, and name it `Jarvis Memory` (the name can't be changed later, only deleted and re-added).
 3. **Create the skill manually:** **More** → **Customize** → **Skills** → **Create** → **Create manually**, then fill in:
    - **Name:** `jarvis`
@@ -49,6 +51,7 @@ Gemini refuses skills that load instructions from a database, so there the instr
    - **Instructions:** open [`skills/gemini/INSTRUCTIONS.txt`](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt), select all (`Cmd/Ctrl+A`), copy, and paste it into the Instructions box.
    - Click **Save** and wait until the button says **Saved**.
 4. **Confirm it stuck:** go back to Skills → **⋯** next to `jarvis` → **Edit manually**. The instructions must start with `GEMINI COPY OF JARVIS v…`. If you see the old text, the save didn't persist — paste and save again.
-5. **Use it:** new chat → switch **Chat** to **Task** under the message box → model **Hydrogen** (Everyday help; Neon can't reach connectors) → type `@jar`, pick **jarvis**, add your message. Click **Allow once** when it asks to write. Try `@jarvis jarvis version` first.
+5. **First run:** in a new Task, `@jarvis jarvis setup` — it builds your graph and asks your name, pronouns, time zone and language. Click **Allow once** for each write.
+6. **Use it:** new chat → switch **Chat** to **Task** under the message box → model **Hydrogen** (Everyday help; Neon can't reach connectors) → type `@jar`, pick **jarvis**, add your message. Click **Allow once** when it asks to write. Try `@jarvis jarvis version` first.
 
 **Updating Gemini:** when Gemini says a newer version is live, open Skills → **⋯** next to `jarvis` → **Edit manually**, select all in Instructions, paste the latest [`INSTRUCTIONS.txt`](https://raw.githubusercontent.com/kbhatiya999/jarvis-memory/main/skills/gemini/INSTRUCTIONS.txt), Save, and confirm as in step 4. Your data is untouched; only Gemini's copy of the instructions changes.
